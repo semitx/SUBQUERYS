@@ -1,0 +1,156 @@
+--subquerys using my own databases
+
+Videojuego
+-- Jugadores con edad mayor al promedio
+SELECT * 
+FROM Jugadores 
+WHERE edad > (SELECT AVG(edad) FROM Jugadores);
+
+-- Misiones de más nivel que “Caza del lobo blanco”
+SELECT * 
+FROM Misiones 
+WHERE nivel > (
+  SELECT nivel 
+  FROM Misiones 
+  WHERE nombre = 'Caza del lobo blanco'
+);
+
+-- Jugadores que han jugado más de una partida
+SELECT * 
+FROM Jugadores 
+WHERE id IN (
+  SELECT jugador_id 
+  FROM Partidas 
+  GROUP BY jugador_id 
+  HAVING COUNT(*) > 1
+);
+
+-- Muestra los ítems que sean de tipo arma
+SELECT * 
+FROM Items 
+WHERE tipo IN (
+  SELECT DISTINCT tipo 
+  FROM Items 
+  WHERE tipo = 'arma'
+);
+
+-- Muestra los ítems que tengan de estadística defensa
+SELECT * 
+FROM Items 
+WHERE id IN (
+  SELECT id 
+  FROM Items 
+  WHERE estadistica LIKE '%defensa%'
+);
+
+
+Ligadefutbol
+
+-- Cuenta los partidos por equipo
+SELECT equipo_id, 
+       (SELECT COUNT(*) FROM Partidos p2 WHERE p2.equipo_id = p1.equipo_id) AS cantidad_partidos
+FROM Partidos p1
+GROUP BY equipo_id;
+
+-- Obtiene los jugadores con su equipo
+SELECT nombre,
+       (SELECT nombre FROM Equipos WHERE Equipos.id = Jugadores.equipo_id) AS equipo
+FROM Jugadores;
+
+-- Muestra los árbitros que han arbitrado partidos con más de 3 goles
+SELECT * 
+FROM Arbitros 
+WHERE id IN (
+  SELECT arbitro_id 
+  FROM Partidos 
+  WHERE (goles_local + goles_visitante) > 3
+);
+
+-- Muestra los jugadores con su sueldo y equipo
+SELECT nombre, sueldo,
+       (SELECT nombre FROM Equipos WHERE Equipos.id = Jugadores.equipo_id) AS equipo
+FROM Jugadores;
+
+-- Muestra los equipos con más de una victoria
+SELECT * 
+FROM Equipos 
+WHERE id IN (
+  SELECT equipo_id 
+  FROM Partidos 
+  WHERE resultado = 'victoria' 
+  GROUP BY equipo_id 
+  HAVING COUNT(*) > 1
+);
+
+Tienda
+
+-- Muestra los artículos con su marca
+SELECT nombre, 
+       (SELECT marca FROM Articulos a2 WHERE a2.id = a1.id) AS marca
+FROM Articulos a1;
+
+-- Muestra las compras de cada cliente
+SELECT id, 
+       (SELECT COUNT(*) FROM Compras WHERE Compras.cliente_id = Clientes.id) AS cantidad_compras
+FROM Clientes;
+
+-- Muestra los artículos con precio mayor al promedio
+SELECT * 
+FROM Articulos 
+WHERE precio > (SELECT AVG(precio) FROM Articulos);
+
+-- Muestra los vendedores que han hecho más de 3 ventas
+SELECT * 
+FROM Vendedores 
+WHERE id IN (
+  SELECT vendedor_id 
+  FROM Ventas 
+  GROUP BY vendedor_id 
+  HAVING COUNT(*) > 3
+);
+
+-- Obtiene clientes con saldo menor al total de sus compras
+SELECT * 
+FROM Clientes 
+WHERE saldo < (
+  SELECT SUM(total) 
+  FROM Compras 
+  WHERE Compras.cliente_id = Clientes.id
+);
+
+Escuela
+
+-- Muestra los estudiantes con su grupo
+SELECT nombre, 
+       (SELECT nombre FROM Grupos WHERE Grupos.id = Estudiantes.grupo_id) AS grupo
+FROM Estudiantes;
+
+-- Cuenta los estudiantes de cada grupo
+SELECT grupo_id,
+       (SELECT COUNT(*) FROM Estudiantes e2 WHERE e2.grupo_id = e1.grupo_id) AS total_estudiantes
+FROM Estudiantes e1
+GROUP BY grupo_id;
+
+-- Muestra las materias con sus maestros
+SELECT nombre, 
+       (SELECT nombre FROM Profesores WHERE Profesores.id = Materias.profesor_id) AS maestro
+FROM Materias;
+
+-- Obtener los horarios de un grupo
+SELECT * 
+FROM Horarios 
+WHERE grupo_id = (
+  SELECT id FROM Grupos WHERE nombre = 'Nombre del Grupo'
+);
+
+-- Obtener los grupos con más de 20 estudiantes
+SELECT * 
+FROM Grupos 
+WHERE id IN (
+  SELECT grupo_id 
+  FROM Estudiantes 
+  GROUP BY grupo_id 
+  HAVING COUNT(*) > 20
+);
+
+
