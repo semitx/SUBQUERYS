@@ -1,3 +1,6 @@
+------------------USING SAKILA
+
+
 -- 1. Películas con la misma duración que 'ALIEN CENTER'
 SELECT title 
 FROM film 
